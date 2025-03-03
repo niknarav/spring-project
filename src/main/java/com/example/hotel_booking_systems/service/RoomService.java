@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
+
 @Service
 @RequiredArgsConstructor
 public class RoomService {
@@ -28,14 +30,18 @@ public class RoomService {
 
     public RoomResponse findById(Long id) {
         return roomMapper.roomToResponse(roomRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Room not found")
+                () -> new EntityNotFoundException(
+                        MessageFormat.format("Room by id not found. Id: {0}", id)
+                )
         ));
     }
 
     public RoomResponse createRoom(UpsertRoomRequest request) {
         Room savedRoom = roomMapper.requestToRoom(request);
         savedRoom.setHotel(hotelRepository.findById(request.getHotelId()).orElseThrow(
-                () -> new EntityNotFoundException("Hotel not found")
+                () -> new EntityNotFoundException(
+                        MessageFormat.format("Hotel by id not found. Id: {0}", request.getHotelId())
+                )
         ));
         roomRepository.save(savedRoom);
         return roomMapper.roomToResponse(savedRoom);
@@ -43,7 +49,9 @@ public class RoomService {
 
     public RoomResponse updateRoom(Long id, UpsertRoomRequest request) {
         Room existingRoom = roomRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Room not found")
+                () -> new EntityNotFoundException(
+                        MessageFormat.format("Room by id not found. Id: {0}", id)
+                )
         );
 
         BeanUtils.copyProperties(request, existingRoom);

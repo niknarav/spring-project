@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
+
 @Service
 @RequiredArgsConstructor
 public class HotelService {
@@ -27,7 +29,9 @@ public class HotelService {
         return hotelMapper.hotelToResponse(
                 hotelRepository.findById(id)
                         .orElseThrow(
-                                () -> new EntityNotFoundException("Hotel not found")
+                                () -> new EntityNotFoundException(
+                                        MessageFormat.format("Hotel by id not found, Id: {0}", id)
+                                )
                         )
         );
     }
@@ -42,7 +46,9 @@ public class HotelService {
 
     public HotelResponse updateHotel(Long id, UpsertHotelRequest upsertHotelRequest) {
         Hotel existedHotel = hotelRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Hotel not found")
+                () -> new EntityNotFoundException(
+                        MessageFormat.format("Hotel by id not found, Id: {0}", id)
+                )
         );
         BeanUtils.copyProperties(upsertHotelRequest, existedHotel);
         return hotelMapper.hotelToResponse(
@@ -52,7 +58,7 @@ public class HotelService {
 
     public void deleteHotelById(Long id) {
         if(!hotelRepository.existsById(id)) {
-            throw new EntityNotFoundException("Hotel not found");
+            throw new EntityNotFoundException( MessageFormat.format("Hotel by id not found, Id: {0}", id));
         }
         hotelRepository.deleteById(id);
     }

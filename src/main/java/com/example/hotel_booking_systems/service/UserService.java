@@ -8,6 +8,7 @@ import com.example.hotel_booking_systems.model.user.UserResponsesList;
 import com.example.hotel_booking_systems.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -19,6 +20,8 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final UserMapper userMapper;
+
+    private final PasswordEncoder passwordEncoder;
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
@@ -43,6 +46,7 @@ public class UserService {
     }
 
     public UserResponse createUser(UpsertUserRequest upsertUserRequest) {
+        upsertUserRequest.setPassword(passwordEncoder.encode(upsertUserRequest.getPassword()));
         return userMapper.userToResponse(
                 userRepository.save(userMapper.requestToUser(upsertUserRequest))
         );
@@ -54,6 +58,7 @@ public class UserService {
                         MessageFormat.format("User by id not found. Id: {0}", id)
                 ));
         BeanUtils.copyProperties(upsertUserRequest, existedUser);
+        existedUser.setPassword(passwordEncoder.encode(upsertUserRequest.getPassword()));
         return userMapper.userToResponse(userRepository.save(existedUser));
     }
 

@@ -19,7 +19,7 @@ public interface UserMapper {
     default UserResponsesList userListToUserResponsesList(List<User> userList) {
         UserResponsesList responses = new UserResponsesList();
         responses.setUserResponses(userList.stream()
-                .map(u -> userToResponse(u))
+                .map(this::userToResponse)
                 .toList());
 
         return responses;

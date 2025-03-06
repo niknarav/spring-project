@@ -29,7 +29,7 @@ public interface RoomMapper {
     default RoomResponsesList roomListToRoomResponsesList(List<Room> roomList) {
         RoomResponsesList roomResponsesList = new RoomResponsesList();
         roomResponsesList.setRoomResponses(roomList.stream()
-                .map(r -> roomToResponse(r))
+                .map(this::roomToResponse)
                 .toList());
 
         return roomResponsesList;

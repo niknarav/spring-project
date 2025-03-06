@@ -22,7 +22,7 @@ public interface HotelMapper {
         HotelResponsesList hotelResponsesList = new HotelResponsesList();
 
         hotelResponsesList.setHotelResponses(hotels.stream()
-                .map(h -> hotelToResponse(h))
+                .map(this::hotelToResponse)
                 .toList());
 
         return hotelResponsesList;

@@ -7,6 +7,9 @@ import com.example.hotel_booking_systems.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,18 +30,21 @@ public class HotelController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<HotelResponse> create(@RequestBody UpsertHotelRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(hotelService.createHotel(request));
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<HotelResponse> update(@PathVariable Long id, @RequestBody UpsertHotelRequest request) {
         return ResponseEntity.ok(hotelService.updateHotel(id, request));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
         hotelService.deleteHotelById(id);
         return ResponseEntity.noContent().build();
     }

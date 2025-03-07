@@ -2,6 +2,7 @@ package com.example.hotel_booking_systems.service;
 
 import com.example.hotel_booking_systems.entity.Room;
 import com.example.hotel_booking_systems.mapper.RoomMapper;
+import com.example.hotel_booking_systems.model.room.RoomPageResponse;
 import com.example.hotel_booking_systems.model.room.RoomResponse;
 import com.example.hotel_booking_systems.model.room.RoomResponsesList;
 import com.example.hotel_booking_systems.model.room.UpsertRoomRequest;
@@ -10,9 +11,14 @@ import com.example.hotel_booking_systems.repository.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +66,15 @@ public class RoomService {
 
     public void deleteById(Long id) {
         roomRepository.deleteById(id);
+    }
+
+    public RoomPageResponse searchRooms(Specification<Room> spec, Pageable pageable) {
+        Page<Room> roomPage = roomRepository.findAll(spec, pageable);
+        List<RoomResponse> roomResponses = roomPage.getContent().stream()
+                .map(roomMapper::roomToResponse)
+                .collect(Collectors.toList());
+
+        return new RoomPageResponse(roomResponses, roomPage.getTotalElements());
     }
 
 }

@@ -27,9 +27,9 @@ public class Hotel {
     @Column(name = "distance")
     private String distanceFromTheCityCenter;
 
-    private Integer rating;
+    private Double rating = 0.0;
 
     @Column(name = "number_of_ratings")
-    private Integer numberOfRatings;
+    private Integer numberOfRatings = 0;
 
 }

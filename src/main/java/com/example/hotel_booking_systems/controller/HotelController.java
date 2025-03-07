@@ -1,10 +1,16 @@
 package com.example.hotel_booking_systems.controller;
 
+import com.example.hotel_booking_systems.entity.Hotel;
+import com.example.hotel_booking_systems.model.hotel.HotelPageResponse;
 import com.example.hotel_booking_systems.model.hotel.HotelResponse;
 import com.example.hotel_booking_systems.model.hotel.HotelResponsesList;
 import com.example.hotel_booking_systems.model.hotel.UpsertHotelRequest;
 import com.example.hotel_booking_systems.service.HotelService;
+import com.example.hotel_booking_systems.specification.HotelSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,5 +53,31 @@ public class HotelController {
     public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
         hotelService.deleteHotelById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/updateRating/{id}")
+    public ResponseEntity<HotelResponse> rating(@AuthenticationPrincipal UserDetails userDetails,
+                                                @RequestParam Double newMark, @PathVariable Long id) {
+        HotelResponse updatedHotel = hotelService.updateRating(id, newMark);
+        return ResponseEntity.ok(updatedHotel);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<HotelPageResponse> searchHotels(
+            @RequestParam(required = false) Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String header,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String distance,
+            @RequestParam(required = false) Double rating,
+            @RequestParam(required = false) Integer numberOfRatings,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Specification<Hotel> spec = HotelSpecification.filterByCriteria(id, name, header, city, address, distance, rating, numberOfRatings);
+        HotelPageResponse response = hotelService.searchHotels(spec, pageable);
+        return ResponseEntity.ok(response);
     }
 }

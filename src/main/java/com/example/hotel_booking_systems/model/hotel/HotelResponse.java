@@ -22,7 +22,7 @@ public class HotelResponse {
 
     private String distanceFromTheCityCenter;
 
-    private Integer rating;
+    private Double rating;
 
     private Integer numberOfRatings;
 

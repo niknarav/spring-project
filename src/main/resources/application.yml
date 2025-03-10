@@ -1,4 +1,7 @@
 spring:
+  data:
+    mongodb:
+      uri: mongodb://root:root@localhost:27017/hoteldatabase?authSource=admin
   jpa:
     generate-ddl: true
   datasource:
@@ -9,4 +12,15 @@ spring:
       schema: hotel_schema
       connection-init-sql: CREATE SCHEMA IF NOT EXISTS book_schema
       connection-timeout: 10000
+  kafka:
+    bootstrap-servers: localhost:9092
+
+app:
+  kafka:
+    reservation:
+      kakfaReservationTopic: "reservation-topic"
+      kafkaReservationGroupId: "kafka-reservation-group-id"
+    registration:
+      kafkaRegisterGroupId: "kafka-register-group-id"
+      kafkaRegisterTopic: "register-topic"
 

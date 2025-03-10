@@ -1,6 +1,7 @@
 package com.example.hotel_booking_systems.service;
 
 import com.example.hotel_booking_systems.entity.User;
+import com.example.hotel_booking_systems.event.RegistrationEvent;
 import com.example.hotel_booking_systems.mapper.UserMapper;
 import com.example.hotel_booking_systems.model.user.UpsertUserRequest;
 import com.example.hotel_booking_systems.model.user.UserResponse;
@@ -8,6 +9,7 @@ import com.example.hotel_booking_systems.model.user.UserResponsesList;
 import com.example.hotel_booking_systems.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ public class UserService {
     private final UserMapper userMapper;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final KafkaTemplate<String, RegistrationEvent> kafkaRegistrationTemplate;
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
@@ -47,9 +51,10 @@ public class UserService {
 
     public UserResponse createUser(UpsertUserRequest upsertUserRequest) {
         upsertUserRequest.setPassword(passwordEncoder.encode(upsertUserRequest.getPassword()));
-        return userMapper.userToResponse(
-                userRepository.save(userMapper.requestToUser(upsertUserRequest))
-        );
+        RegistrationEvent event = new RegistrationEvent(userMapper.requestToUser(upsertUserRequest).getId());
+        User createdUser = userRepository.save(userMapper.requestToUser(upsertUserRequest));
+        kafkaRegistrationTemplate.send("register-topic", event);
+        return userMapper.userToResponse(createdUser);
     }
 
     public UserResponse updateUser(Long id, UpsertUserRequest upsertUserRequest) {

@@ -1,6 +1,8 @@
 package com.example.hotel_booking_systems.service;
 
 import com.example.hotel_booking_systems.entity.User;
+import com.example.hotel_booking_systems.event.StatisticsEvent;
+import com.example.hotel_booking_systems.event.UserRegistrationEvent;
 import com.example.hotel_booking_systems.mapper.UserMapper;
 import com.example.hotel_booking_systems.model.user.UpsertUserRequest;
 import com.example.hotel_booking_systems.model.user.UserResponse;
@@ -22,6 +24,8 @@ public class UserService {
     private final UserMapper userMapper;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final StatisticsService statisticsService;
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
@@ -47,9 +51,11 @@ public class UserService {
 
     public UserResponse createUser(UpsertUserRequest upsertUserRequest) {
         upsertUserRequest.setPassword(passwordEncoder.encode(upsertUserRequest.getPassword()));
-        return userMapper.userToResponse(
-                userRepository.save(userMapper.requestToUser(upsertUserRequest))
-        );
+        User user = userRepository.save(userMapper.requestToUser(upsertUserRequest));
+        UserRegistrationEvent event = new UserRegistrationEvent();
+        event.setUserId(user.getId());
+        statisticsService.saveUserRegistrationEvent(event);
+        return userMapper.userToResponse(user);
     }
 
     public UserResponse updateUser(Long id, UpsertUserRequest upsertUserRequest) {

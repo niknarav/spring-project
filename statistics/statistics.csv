@@ -1,0 +1,3 @@
+EventType,UserId,CheckInDate,CheckOutDate
+UserRegistration,2,null,null
+RoomBooking,2,1212-12-12,1212-12-12
